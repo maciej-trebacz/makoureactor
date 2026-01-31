@@ -156,6 +156,7 @@ Arguments::Arguments() :
 	        "Arguments",
 	        "\nList of available commands:\n"
 	        "  export           Export various assets from archive to files\n"
+	        "  import           Import various assets from files to archive\n"
 	        "  patch            Patch archive\n"
 	        "  unpack-bg-mod    Unpack background mod packed with Palmer\n"
 	        "\n"
@@ -181,6 +182,8 @@ void Arguments::parse()
 
 	if (command == "export") {
 		_command = Export;
+	} else if (command == "import") {
+		_command = Import;
 	} else if (command == "patch") {
 		_command = Patch;
 	}  else if (command == "unpack-bg-mod") {

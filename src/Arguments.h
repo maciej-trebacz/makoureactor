@@ -62,7 +62,7 @@ public:
 	enum Command {
 		None,
 		Export,
-		//Import,
+		Import,
 		Patch,
 		Tools
 	};

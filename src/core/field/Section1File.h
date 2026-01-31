@@ -39,6 +39,8 @@ public:
 	QByteArray save() const override;
 	bool exporter(QIODevice *device, ExportFormat format);
 	bool importer(QIODevice *device, ExportFormat format);
+	bool exportScripts(QIODevice *device) const;
+	bool importScripts(QIODevice *device, QString *errorStr = nullptr);
 	bool isModified() const override;
 
 	int modelID(quint8 grpScriptID) const;
@@ -97,6 +99,7 @@ public:
 
 	quint16 scale() const;
 	void setScale(quint16 scale);
+	quint16 version() const;
 
 	qsizetype availableBytesForScripts() const;
 private:

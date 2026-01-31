@@ -1490,7 +1490,9 @@ void Window::massImport()
 
 			showProgression(tr("Import..."), false);
 
-			if (massImportDialog->importModule(MassImportDialog::Texts)) {
+			if (massImportDialog->importModule(MassImportDialog::Scripts)) {
+				toImport.insert(Field::Scripts, massImportDialog->moduleFormat(MassImportDialog::Scripts));
+			} else if (massImportDialog->importModule(MassImportDialog::Texts)) {
 				toImport.insert(Field::Scripts, massImportDialog->moduleFormat(MassImportDialog::Texts));
 			}
 

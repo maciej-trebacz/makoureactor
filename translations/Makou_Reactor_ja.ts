@@ -79,16 +79,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>
-List of available commands:
-  export           Export various assets from archive to files
-  patch            Patch archive
-  unpack-bg-mod    Unpack background mod packed with Palmer
-
-&quot;%1 export --help&quot; to see help of the specific subcommand</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Please specify a command</source>
         <translation type="unfinished"></translation>
     </message>
@@ -120,11 +110,33 @@ List of available commands:
         <source>Error: directory does not exist:</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>
+List of available commands:
+  export           Export various assets from archive to files
+  import           Import various assets from files to archive
+  patch            Patch archive
+  unpack-bg-mod    Unpack background mod packed with Palmer
+
+&quot;%1 export --help&quot; to see help of the specific subcommand</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ArgumentsExport</name>
     <message>
         <source>Output directory.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ArgumentsImport</name>
+    <message>
+        <source>Input directory.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Output file (optional).</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -486,6 +498,10 @@ Are you sure you want to continue?</source>
     </message>
     <message>
         <source>This error should not appear, thank you for reporting it</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>An error occured when importing</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1731,6 +1747,14 @@ Some scripts can refer to it!</source>
     </message>
     <message>
         <source>Import musics</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Import scripts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>MRS Script</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

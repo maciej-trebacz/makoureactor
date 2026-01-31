@@ -26,7 +26,7 @@ class MassImportDialog : public QDialog
 	Q_OBJECT
 public:
 	enum ImportType {
-		Fields, Akaos, Texts
+		Fields, Akaos, Texts, Scripts
 	};
 
 	explicit MassImportDialog(QWidget *parent = nullptr);

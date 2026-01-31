@@ -18,6 +18,7 @@
 #include "CLI.h"
 #include "Arguments.h"
 #include "ArgumentsExport.h"
+#include "ArgumentsImport.h"
 #include "ArgumentsPatch.h"
 #include "ArgumentsTools.h"
 #include "core/field/FieldArchivePS.h"
@@ -120,6 +121,9 @@ void CLI::commandExport()
 	if (!argsExport.textFormat().isEmpty()) {
 		toExport.insert(FieldArchive::Texts, argsExport.textFormat());
 	}
+	if (!argsExport.scriptFormat().isEmpty()) {
+		toExport.insert(FieldArchive::Scripts, argsExport.scriptFormat());
+	}
 	if (!argsExport.chunkFormat().isEmpty()) {
 		toExport.insert(FieldArchive::Chunks, argsExport.chunkFormat());
 	}
@@ -129,6 +133,66 @@ void CLI::commandExport()
 		qWarning() << qPrintable(QCoreApplication::translate("CLI", "An error occured when exporting"));
 	}
 
+	delete fieldArchive;
+}
+
+void CLI::commandImport()
+{
+	ArgumentsImport argsImport;
+	if (argsImport.help() || argsImport.directory().isEmpty()) {
+		argsImport.showHelp();
+	}
+
+	FieldArchive *fieldArchive = openFieldArchive(argsImport.inputFormat(), argsImport.path());
+	if (fieldArchive == nullptr) {
+		return;
+	}
+
+	QList<int> selectedFields;
+	QList<QRegularExpression> includes, excludes;
+	QStringList includePatterns = argsImport.includes(), excludePatterns = argsImport.excludes();
+
+	for (const QString &pattern: includePatterns) {
+		includes.append(QRegularExpression(QRegularExpression::anchoredPattern(QRegularExpression::wildcardToRegularExpression(pattern))));
+	}
+	for (const QString &pattern: excludePatterns) {
+		excludes.append(QRegularExpression(QRegularExpression::anchoredPattern(QRegularExpression::wildcardToRegularExpression(pattern))));
+	}
+
+	FieldArchiveIterator it(*fieldArchive);
+	while (it.hasNext()) {
+		const Field *field = it.next(false);
+		if (field != nullptr) {
+			bool found = includes.isEmpty();
+			for (const QRegularExpression &regExp: includes) {
+				if (regExp.match(field->name()).hasMatch()) {
+					found = true;
+					break;
+				}
+			}
+			for (const QRegularExpression &regExp: excludes) {
+				if (regExp.match(field->name()).hasMatch()) {
+					found = false;
+					break;
+				}
+			}
+
+			if (found) {
+				selectedFields.append(it.mapId());
+			}
+		}
+	}
+
+	QMap<Field::FieldSection, QString> toImport;
+	if (!argsImport.scriptFormat().isEmpty()) {
+		toImport.insert(Field::Scripts, argsImport.scriptFormat());
+	}
+
+	if (!fieldArchive->importation(selectedFields, argsImport.directory(), toImport)) {
+		qWarning() << qPrintable(QCoreApplication::translate("CLI", "An error occured when importing"));
+	}
+
+	fieldArchive->save(argsImport.targetFile());
 	delete fieldArchive;
 }
 
@@ -408,6 +472,9 @@ void CLI::exec()
 		args.showHelp();
 	case Arguments::Export:
 		commandExport();
+		break;
+	case Arguments::Import:
+		commandImport();
 		break;
 	case Arguments::Patch:
 		commandPatch();

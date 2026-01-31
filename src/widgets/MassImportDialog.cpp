@@ -36,6 +36,11 @@ MassImportDialog::MassImportDialog(QWidget *parent) :
 											 QStringList() <<
 											 tr("XML Text") + ";;xml" <<
 											 tr("Simple text TXT") + ";;txt", this));
+	imports.insert(Scripts,
+				   new FormatSelectionWidget(tr("Import scripts"),
+											 QStringList() <<
+											 tr("MRS Script") + ";;mrs", this));
+	imports.value(Scripts)->setChecked(false);
 
 	dirPath = new QLineEdit(this);
 	dirPath->setText(Config::value("importDirectory").toString());

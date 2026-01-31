@@ -1877,6 +1877,22 @@ bool FieldArchive::exportation(const QList<int> &selectedFields, const QString &
 					}
 				}
 			}
+			if (toExport.contains(Scripts)) {
+				Section1File *section1 = f->scriptsAndTexts();
+				if (section1->isOpen()) {
+					extension = toExport.value(Scripts);
+					path = QDir::cleanPath(QString("%1/%2.%3").arg(directory, f->name(), extension));
+					if (overwrite || !QFile::exists(path)) {
+						QFile scriptExport(path);
+						if (extension != "mrs") {
+							return false;
+						}
+						if (!section1->exportScripts(&scriptExport)) {
+							return false;
+						}
+					}
+				}
+			}
 			if (toExport.contains(Chunks)) {
 				path = QDir::cleanPath(directory);
 				extension = toExport.value(Chunks);
@@ -1922,8 +1938,6 @@ bool FieldArchive::exportation(const QList<int> &selectedFields, const QString &
 bool FieldArchive::importation(const QList<int> &selectedFields, const QString &directory,
 							   const QMap<Field::FieldSection, QString> &toImport)
 {
-	Q_UNUSED(directory) //TODO
-
 	if (selectedFields.isEmpty() || toImport.isEmpty()) {
 		return true;
 	}
@@ -1937,7 +1951,26 @@ bool FieldArchive::importation(const QList<int> &selectedFields, const QString &
 			if (toImport.contains(Field::Scripts)) {
 				Section1File *section1 = f->scriptsAndTexts();
 				if (section1->isOpen()) {
-					//TODO
+					const QString extension = toImport.value(Field::Scripts);
+					const QString path = QDir::cleanPath(QString("%1/%2.%3").arg(directory, f->name(), extension));
+					QFile importFile(path);
+					bool ok = false;
+					if (extension == "mrs") {
+						QString error;
+						ok = section1->importScripts(&importFile, &error);
+					} else if (extension == "txt" || extension == "xml") {
+						Section1File::ExportFormat format = extension == "txt"
+							? Section1File::TXTText
+							: Section1File::XMLText;
+						ok = section1->importer(&importFile, format);
+					}
+					if (!ok) {
+						return false;
+					}
+
+					if (section1->isModified() && !f->isModified()) {
+						f->setModified(true);
+					}
 				}
 			}
 		}

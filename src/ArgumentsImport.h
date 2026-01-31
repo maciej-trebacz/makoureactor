@@ -1,5 +1,4 @@
 /****************************************************************************
- ** Makou Reactor Final Fantasy VII Field Script Editor
  ** Copyright (C) 2009-2021 Arzel Jérôme <myst6re@gmail.com>
  **
  ** This program is free software: you can redistribute it and/or modify
@@ -18,40 +17,17 @@
 #pragma once
 
 #include <QtCore>
-#include <Archive.h>
+#include "Arguments.h"
 
-class FieldArchive;
-
-struct CLIObserver : public ArchiveObserver
-{
-	CLIObserver() {}
-	inline void setFilename(const QString &filename) {
-		_filename = filename;
-	}
-	inline bool observerWasCanceled() const {
-		return false;
-	}
-	inline void setObserverMaximum(unsigned int max) {
-		_maximum = max;
-	}
-	virtual void setObserverValue(int value);
-	virtual bool observerRetry(const QString &message);
-private:
-	void setPercent(quint8 percent);
-	qint64 _maximum;
-	quint8 _lastPercent;
-	QString _filename;
-};
-
-class CLI
+class ArgumentsImport : public CommonArguments
 {
 public:
-	static void exec();
+	ArgumentsImport();
+	QString scriptFormat() const;
+	QString directory() const;
+	QString targetFile() const;
 private:
-	static void commandExport();
-	static void commandImport();
-	static void commandPatch();
-	static void commandTools();
-	static FieldArchive *openFieldArchive(const QString &ext, const QString &path);
-	static CLIObserver observer;
+	void parse();
+	QString _directory;
+	QString _targetFile;
 };
