@@ -41,6 +41,9 @@ project("Makou Reactor" VERSION 2.2.0 LANGUAGES CXX
 # Try to autodetect Qt path if not specified
 include(qt.cmake)
 
+# Prefer local CMake modules (e.g., WrapOpenGL override)
+list(PREPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

@@ -117,3 +117,6 @@ set(_qt_translations_dir "${_qt_dir}/translations")
 
 # Add the QT_PATH to the resolution paths
 list(APPEND CMAKE_PREFIX_PATH "${QT_PATH}")
+
+# Prefer port-local CMake modules (e.g., WrapOpenGL override)
+list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
