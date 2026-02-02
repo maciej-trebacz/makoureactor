@@ -59,6 +59,10 @@ MassExportDialog::MassExportDialog(QWidget *parent) :
 	                                         QStringList() <<
 	                                             tr("XML Text") + ";;xml" <<
 	                                             tr("Simple text TXT") + ";;txt", this));
+	exports.insert(FieldArchive::Scripts,
+	               new FormatSelectionWidget(tr("Export scripts"),
+	                                         QStringList() <<
+	                                             tr("MRS Script") + ";;mrs", this));
 	exports.insert(FieldArchive::Chunks,
 	               new FormatSelectionWidget(tr("Export chunks"),
 	                                         QStringList() <<

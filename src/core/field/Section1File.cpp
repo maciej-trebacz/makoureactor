@@ -359,6 +359,129 @@ bool readHexParams(const QString &value, QByteArray &out, QString *errorStr, int
 	return true;
 }
 
+void setJumpRaw(Opcode &opcode, qint32 jumpValue)
+{
+	switch (opcode.id()) {
+	case OpcodeKey::JMPF:
+		opcode.op().opcodeJMPF.jump = quint8(jumpValue);
+		break;
+	case OpcodeKey::JMPB:
+		opcode.op().opcodeJMPB.jump = quint8(jumpValue);
+		break;
+	case OpcodeKey::IFUB:
+		opcode.op().opcodeIFUB.jump = quint8(jumpValue);
+		break;
+	case OpcodeKey::IFSW:
+		opcode.op().opcodeIFSW.jump = quint8(jumpValue);
+		break;
+	case OpcodeKey::IFUW:
+		opcode.op().opcodeIFUW.jump = quint8(jumpValue);
+		break;
+	case OpcodeKey::IFKEY:
+		opcode.op().opcodeIFKEY.jump = quint8(jumpValue);
+		break;
+	case OpcodeKey::IFKEYON:
+		opcode.op().opcodeIFKEYON.jump = quint8(jumpValue);
+		break;
+	case OpcodeKey::IFKEYOFF:
+		opcode.op().opcodeIFKEYOFF.jump = quint8(jumpValue);
+		break;
+	case OpcodeKey::IFPRTYQ:
+		opcode.op().opcodeIFPRTYQ.jump = quint8(jumpValue);
+		break;
+	case OpcodeKey::IFMEMBQ:
+		opcode.op().opcodeIFMEMBQ.jump = quint8(jumpValue);
+		break;
+	case OpcodeKey::JMPFL:
+		opcode.op().opcodeJMPFL.jump = quint16(jumpValue);
+		break;
+	case OpcodeKey::JMPBL:
+		opcode.op().opcodeJMPBL.jump = quint16(jumpValue);
+		break;
+	case OpcodeKey::IFUBL:
+		opcode.op().opcodeIFUBL.jump = quint16(jumpValue);
+		break;
+	case OpcodeKey::IFSWL:
+		opcode.op().opcodeIFSWL.jump = quint16(jumpValue);
+		break;
+	case OpcodeKey::IFUWL:
+		opcode.op().opcodeIFUWL.jump = quint16(jumpValue);
+		break;
+	case OpcodeKey::Unused1B:
+		opcode.op().opcodeUnused1B.jump = quint16(jumpValue);
+		break;
+	default:
+		break;
+	}
+}
+
+void fillJumpValues(QList<Opcode> &opcodes)
+{
+	auto jumpShiftForOpcode = [](OpcodeKey id) -> quint8 {
+		switch (id) {
+		case OpcodeKey::JMPF:
+		case OpcodeKey::JMPFL:
+		case OpcodeKey::Unused1B:
+			return 1;
+		case OpcodeKey::JMPB:
+		case OpcodeKey::JMPBL:
+			return 0;
+		case OpcodeKey::IFUB:
+		case OpcodeKey::IFUBL:
+			return 5;
+		case OpcodeKey::IFSW:
+		case OpcodeKey::IFSWL:
+		case OpcodeKey::IFUW:
+		case OpcodeKey::IFUWL:
+			return 7;
+		case OpcodeKey::IFKEY:
+		case OpcodeKey::IFKEYON:
+		case OpcodeKey::IFKEYOFF:
+			return 3;
+		case OpcodeKey::IFPRTYQ:
+		case OpcodeKey::IFMEMBQ:
+			return 2;
+		default:
+			break;
+		}
+		return 0;
+	};
+
+	QHash<quint16, qint32> labelPositions;
+	qint32 pos = 0;
+	for (const Opcode &opcode : std::as_const(opcodes)) {
+		if (opcode.id() == OpcodeKey::LABEL) {
+			labelPositions.insert(opcode.op().opcodeLABEL._label, pos);
+		} else {
+			pos += opcode.size();
+		}
+	}
+
+	pos = 0;
+	for (Opcode &opcode : opcodes) {
+		if (opcode.id() == OpcodeKey::LABEL) {
+			continue;
+		}
+		if (opcode.isJump()) {
+			const quint16 label = quint16(opcode.label());
+			if (labelPositions.contains(label)) {
+				const qint32 jump = labelPositions.value(label) - pos;
+				const qint32 realJump = opcode.isBackJump() ? -jump : jump - jumpShiftForOpcode(opcode.id());
+				if (opcode.isLongJump()) {
+					if (realJump >= 0 && realJump <= 65535) {
+						setJumpRaw(opcode, realJump);
+					}
+				} else {
+					if (realJump >= 0 && realJump <= 255) {
+						setJumpRaw(opcode, realJump);
+					}
+				}
+			}
+		}
+		pos += opcode.size();
+	}
+}
+
 QString opcodeNamedParams(const Opcode &opcode)
 {
 	QStringList parts;
@@ -4118,7 +4241,9 @@ bool Section1File::importScripts(QIODevice *device, QString *errorStr)
 
 		QMap<int, Script> compiledScripts;
 		for (auto scriptIt = it->scripts.constBegin(); scriptIt != it->scripts.constEnd(); ++scriptIt) {
-			Script script(scriptIt.value());
+			QList<Opcode> opcodes = scriptIt.value();
+			fillJumpValues(opcodes);
+			Script script(opcodes);
 			int opcodeId = 0;
 			QString compileError;
 			if (!script.compile(opcodeId, compileError)) {

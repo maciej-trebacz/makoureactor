@@ -1336,20 +1336,37 @@ void Window::exportCurrentMap()
 			fieldLzs = tr("PC Field Map (* *.lzs)"),
 			dat = tr("Data DAT File (*.DAT)"),
 			mim = tr("Textures MIM File (*.MIM)"),
-			fieldDec = tr("Uncompressed PC Field Map (*.dec)");
+			fieldDec = tr("Uncompressed PC Field Map (*.dec)"),
+			mrs = tr("MRS Script") + " (*.mrs)";
 
 	name = _fieldList->selectedItems().first()->text(0);
 
 	if (fieldArchive->io()->isPC()) {
-		types = fieldLzs+";;"+fieldDec;
+		types = fieldLzs+";;"+fieldDec+";;"+mrs;
 	} else {
-		types = dat+";;"+mim;
+		types = dat+";;"+mim+";;"+mrs;
 		name = name.toUpper();
 	}
 
 	QString path = Config::value("exportPath").toString().isEmpty() ? fieldArchive->io()->directory() : Config::value("exportPath").toString()+"/";
 	path = QFileDialog::getSaveFileName(this, tr("Export the current file"), path+name, types, &selectedFilter);
 	if (path.isNull()) {
+		return;
+	}
+	const bool isMrs = selectedFilter == mrs || path.endsWith(".mrs", Qt::CaseInsensitive);
+	if (isMrs) {
+		Section1File *section1 = field->scriptsAndTexts();
+		if (!section1 || !section1->isOpen()) {
+			QMessageBox::warning(this, tr("Error"), tr("Cannot open scripts"));
+			return;
+		}
+		QFile scriptExport(path);
+		if (!section1->exportScripts(&scriptExport)) {
+			QMessageBox::warning(this, tr("Error"), tr("An error occurred when exporting"));
+			return;
+		}
+		qsizetype index = path.lastIndexOf('/');
+		Config::setValue("exportPath", index == -1 ? path : path.left(index));
 		return;
 	}
 	int error = 4;
@@ -1450,6 +1467,9 @@ void Window::massExport()
 			if (massExportDialog->exportModule(FieldArchive::Texts)) {
 				toExport.insert(FieldArchive::Texts, massExportDialog->moduleFormat(FieldArchive::Texts));
 			}
+			if (massExportDialog->exportModule(FieldArchive::Scripts)) {
+				toExport.insert(FieldArchive::Scripts, massExportDialog->moduleFormat(FieldArchive::Scripts));
+			}
 			if (massExportDialog->exportModule(FieldArchive::Chunks)) {
 				toExport.insert(FieldArchive::Chunks, massExportDialog->moduleFormat(FieldArchive::Chunks));
 			}
@@ -1527,9 +1547,10 @@ void Window::importToCurrentMap()
 	QString name, selectedFilter,
 	    pc = tr("PC Field Map (*)"),
 	    chunk = tr("Field chunk (*.chunk*.?)"),
-	    dat = tr("PS Field Map (*.DAT)");
+	    dat = tr("PS Field Map (*.DAT)"),
+	    mrs = tr("MRS Script") + " (*.mrs)";
 	QStringList filter;
-	filter << dat << pc << chunk;
+	filter << dat << pc << chunk << mrs;
 
 	name = _fieldList->selectedItems().first()->text(0);
 	if (fieldArchive->io()->isPS()) {
@@ -1543,8 +1564,22 @@ void Window::importToCurrentMap()
 	}
 
 	bool isChunk = selectedFilter == chunk;
+	bool isMRS = selectedFilter == mrs || path.endsWith(".mrs", Qt::CaseInsensitive);
 	
-	if (isChunk) {
+	if (isMRS) {
+		Section1File *section1 = field->scriptsAndTexts();
+		if (!section1 || !section1->isOpen()) {
+			QMessageBox::warning(this, tr("Error"), tr("Cannot open scripts"));
+			return;
+		}
+		QString error;
+		QFile importFile(path);
+		if (!section1->importScripts(&importFile, &error)) {
+			QMessageBox::warning(this, tr("Error"), error.isEmpty() ? tr("An error occurred when importing")
+			                                                       : error);
+			return;
+		}
+	} else if (isChunk) {
 		if (!field->importChunk(path)) {
 			QMessageBox::warning(this, tr("Error"), field->errorString());
 			return;

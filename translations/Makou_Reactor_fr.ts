@@ -8638,6 +8638,18 @@ scene %1 (%2), group %3 (%4), script %5, line %6: %7</source>
         <source>PC Field Map (* *.lzs)</source>
         <translation>Écran field PC (* *.lzs)</translation>
     </message>
+    <message>
+        <source>MRS Script</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cannot open scripts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>An error occurred when exporting</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>main</name>
