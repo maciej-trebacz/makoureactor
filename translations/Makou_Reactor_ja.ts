@@ -1668,6 +1668,14 @@ Some scripts can refer to it!</source>
         <source>Chunk 9 (Background PC)</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Export scripts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>MRS Script</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>MassImportDialog</name>

@@ -1859,6 +1859,14 @@ Certains scripts peuvent y faire référence !</translation>
         <source>Chunk 9 (Background PC)</source>
         <translation>Section 9 (Décors PC)</translation>
     </message>
+    <message>
+        <source>Export scripts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>MRS Script</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>MassImportDialog</name>
